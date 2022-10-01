@@ -60,11 +60,38 @@ options:
                         The path of log folder.
   --no_date_folder      By default, the logs of each day will be saved in a
                         separated folder. Use this option to turn it off.
+  --mqtt_broker_ip MQTT_BROKER_IP
+  			The IP address of the MQTT broker.
+  --mqtt_broker_port MQTT_BROKER_port
+  			The port of the MQTT broker.
+  --mqtt_broker_username MQTT_BROKER_USERNAME
+  			The username of the MQTT broker.
+  --mqtt_broker_password MQTT_BROKER_PASSWORD
+  			The password of the MQTT broker.
 ```
 
 ## How it works
 
 While FindMy is running, it stores the information of your devices in temporary files `~/Library/Caches/com.apple.findmy.fmipcore/Items.data` `~/Library/Caches/com.apple.findmy.fmipcore/Devices.data` in JSON format. `FindMyHistory` periodically reads these files and stores a new record for each device if there is an update. 
+
+
+## Home Assistant MQTT Device Tracker sensor configuration example
+
+```
+mqtt:
+  device_tracker:
+  - name: Wallet
+    # state_topic can be any random fake value that isn't going to be called
+    # We don't care about the 'state' of the tracker, just the attributes
+    state_topic: "FindMyHistory/WalletFAKE"
+    json_attributes_topic: "FindMyHistory/Wallet"
+    json_attributes_template: >
+      { "source_type": "gps",
+        "latitude": {{value_json['location|latitude']}},
+        "longitude": {{value_json['location|longitude']}},
+        "gps_accuracy": {{value_json['location|horizontalAccuracy']}}
+      }
+```
 
 ## Contributing
 

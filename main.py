@@ -66,6 +66,27 @@ def parse_args():
         action='store_true',
         help='By default, the logs of each day will be saved in a separated '
              'folder. Use this option to turn it off.')
+    parser.add_argument(
+        '--mqtt_broker_ip',
+        type=str,
+        action='store',
+        help='The IP address of the MQTT broker.')
+    parser.add_argument(
+        '--mqtt_broker_port',
+        type=int,
+        action='store',
+        default=1883,
+        help='The port of the MQTT broker.')
+    parser.add_argument(
+        '--mqtt_broker_username',
+        type=str,
+        action='store',
+        help='The username of the MQTT broker.')
+    parser.add_argument(
+        '--mqtt_broker_password',
+        type=str,
+        action='store',
+        help='The password of the MQTT broker.')
     args = parser.parse_args()
 
     return args
@@ -84,7 +105,12 @@ def main(stdscr):
         json_layer_separator=JSON_LAYER_SEPARATOR,
         null_str=NULL_STR,
         date_format=DATE_FORMAT,
-        no_date_folder=args.no_date_folder)
+        no_date_folder=args.no_date_folder,
+        mqtt_broker_ip=args.mqtt_broker_ip,
+        mqtt_broker_port=args.mqtt_broker_port,
+        mqtt_broker_username=args.mqtt_broker_username,
+        mqtt_broker_password=args.mqtt_broker_password)
+
     while True:
         log_manager.refresh_log()
         latest_log, log_cnt = log_manager.get_latest_log()
