@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 from datetime import datetime
 from collections import defaultdict
 from lib.mqtt_manager import MqttManager
@@ -102,6 +103,7 @@ class LogManager(object):
                 self._log_cnt[name] += 1
                 if self._mqtt_manager:
                     topic_key_value = items_dict[name][MQTT_TOPIC_KEY]
+                    topic_key_value = re.sub(r"[\#\+]", '', topic_key_value)
                     if topic_key_value and topic_key_value != "NULL":
                         topic = MQTT_TOPIC_BASE + '/' + topic_key_value
                         self._mqtt_manager.publish(topic, items_dict[name])
