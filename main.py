@@ -92,9 +92,8 @@ def parse_args():
     return args
 
 
-def main(stdscr):
+def main(stdscr, args):
     stdscr.clear()
-    args = parse_args()
     log_manager = LogManager(
         findmy_files=[os.path.expanduser(f) for f in FINDMY_FILES],
         store_keys=args.store_keys,
@@ -140,4 +139,5 @@ def main(stdscr):
 
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    args = parse_args()
+    curses.wrapper(main, args)
