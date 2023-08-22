@@ -60,6 +60,9 @@ options:
                         The path of log folder.
   --no_date_folder      By default, the logs of each day will be saved in a
                         separated folder. Use this option to turn it off.
+  --traccar_url TRACCAR_URL
+                        The full url (http://..) including port for the traccar server.
+
 ```
 
 ## How it works

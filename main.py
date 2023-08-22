@@ -14,7 +14,7 @@ from lib.constants import NULL_STR
 from lib.constants import TIME_FORMAT
 from lib.constants import DATE_FORMAT
 from lib.log_manager import LogManager
-
+from lib.traccar import Traccar
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -68,6 +68,12 @@ def parse_args():
         action='store_true',
         help='By default, the logs of each day will be saved in a separated '
              'folder. Use this option to turn it off.')
+    parser.add_argument(
+        '--traccar_url',
+        type=str,
+        action='store',
+        default=None,
+        help='The full url (http://..) including port for the traccar server.')
     args = parser.parse_args()
 
     return args
@@ -87,6 +93,8 @@ def main(stdscr, args):
         null_str=NULL_STR,
         date_format=DATE_FORMAT,
         no_date_folder=args.no_date_folder)
+    if args.traccar_url:
+        traccar = Traccar(args.traccar_url)
     while True:
         log_manager.refresh_log()
         latest_log, log_cnt = log_manager.get_latest_log()
@@ -97,10 +105,16 @@ def main(stdscr, args):
                 latest_time = datetime.fromtimestamp(
                     float(latest_time) / 1000.)
                 latest_time = latest_time.strftime(TIME_FORMAT)
-            table.append([name, latest_time, log_cnt[name]])
+            if args.traccar_url:
+                traccar_response, traccar_id = traccar.send(log)
+                table.append([name, latest_time, log_cnt[name], traccar_response, traccar_id])
+                headers=['Name', 'Last update', 'Log count', 'Traccar OK', 'Traccar ID']
+            else:
+                table.append([name, latest_time, log_cnt[name]])
+                headers=['Name', 'Last update', 'Log count']
         table = tabulate(
             table,
-            headers=['Name', 'Last update', 'Log count'],
+            headers=headers,
             tablefmt="github")
 
         stdscr.erase()
