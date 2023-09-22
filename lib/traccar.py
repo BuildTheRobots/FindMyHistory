@@ -36,6 +36,7 @@ class Traccar(object):
             # ignore when timestamp havent changed since last time
             return (lastupdate.latest_traccar, id)
 
+        # battlev = data["batteryLevel"] * 100
         formdata = {
             "id": id,
             "timestamp": int(timestamp / 1000),
@@ -47,6 +48,10 @@ class Traccar(object):
             "devicemodel": data["deviceModel"],
             "name": data["name"],
         }
+
+        if data["batteryLevel"] != "NULL":
+            value = data["batteryLevel"] * 100
+            formdata.update({"batt": value})
 
         result = requests.post(self._url, data=formdata, timeout=5)
         self._updates[id] = self.LatestUpdate(timestamp, result.ok)
