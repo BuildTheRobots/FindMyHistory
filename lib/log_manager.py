@@ -1,14 +1,20 @@
 import csv
 import json
 import os
+import re
 from datetime import datetime
 from collections import defaultdict
+from lib.mqtt_manager import MqttManager
+from lib.constants import MQTT_TOPIC_BASE
+from lib.constants import MQTT_TOPIC_KEY
 
 
 class LogManager(object):
     def __init__(self, findmy_files, store_keys, timestamp_key, log_folder,
                  name_keys, name_separator, json_layer_separator, null_str,
-                 date_format, no_date_folder):
+                 date_format, no_date_folder, mqtt_broker_ip, 
+                 mqtt_broker_port, mqtt_broker_username, 
+                 mqtt_broker_password):
         self._findmy_files = findmy_files
         self._store_keys = store_keys
         self._timestamp_key = timestamp_key
@@ -19,6 +25,14 @@ class LogManager(object):
         self._null_str = null_str
         self._date_format = date_format
         self._no_date_folder = no_date_folder
+
+        self._mqtt_manager = None
+        if mqtt_broker_ip:
+            self._mqtt_manager = MqttManager(
+                mqtt_broker_ip,
+                mqtt_broker_port,
+                mqtt_broker_username,
+                mqtt_broker_password)
 
         self._latest_log = {}
         self._log_cnt = defaultdict(int)
@@ -87,6 +101,12 @@ class LogManager(object):
                 self._save_log(name, items_dict[name])
                 self._latest_log[name] = items_dict[name]
                 self._log_cnt[name] += 1
+                if self._mqtt_manager:
+                    topic_key_value = items_dict[name][MQTT_TOPIC_KEY]
+                    topic_key_value = re.sub(r"[\#\+]", '', topic_key_value)
+                    if topic_key_value and topic_key_value != "NULL":
+                        topic = MQTT_TOPIC_BASE + '/' + topic_key_value
+                        self._mqtt_manager.publish(topic, items_dict[name])
 
     def get_latest_log(self):
         return self._latest_log, self._log_cnt
